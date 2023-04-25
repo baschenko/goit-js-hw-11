@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-// const axios = require('axios');
-
 export default class PictureApiService {
   static ENDPOINT = 'https://pixabay.com/api/';
   static API_KEY = '35663749-81f1024cac44a82003cb090b4';
