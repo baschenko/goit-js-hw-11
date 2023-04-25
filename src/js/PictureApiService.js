@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const axios = require('axios');
+// const axios = require('axios');
 
 export default class PictureApiService {
   static ENDPOINT = 'https://pixabay.com/api/';
