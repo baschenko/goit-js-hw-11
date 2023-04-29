@@ -7,17 +7,20 @@ export default class PictureApiService {
 
   constructor() {
     this.query = '';
-    this.pages = 1;
+    this.pages = 0;
     this.totalHits = 0;
+    this.perPages = 40;
+    this.totalPages = 0;
   }
 
   async getPictures() {
-    console.log('GET');
-    const url = `${PictureApiService.ENDPOINT}?key=${PictureApiService.API_KEY}&q=${this.query}&${PictureApiService.OPTIONS}&per_page=40&page=${this.pages}`;
-
-    const { data } = await axios.get(url);
+    console.log('GET', this.pages);
     this.incrementPage();
+    const url = `${PictureApiService.ENDPOINT}?key=${PictureApiService.API_KEY}&q=${this.query}&${PictureApiService.OPTIONS}&per_page=${this.perPages}&page=${this.pages}`;
+    const { data } = await axios.get(url);
+
     this.totalHits = data.totalHits;
+    this.getTotalPages();
     return data;
   }
 
@@ -26,6 +29,18 @@ export default class PictureApiService {
   }
 
   resetPage() {
-    this.pages = 1;
+    this.pages = 0;
+  }
+
+  getTotalPages() {
+    this.totalPages = Math.ceil(this.totalHits / this.perPages);
+  }
+
+  isLoadShowMore() {
+    if (this.pages < this.totalPages) {
+      return true;
+    } else if ((this.pages === this.totalPages)) {
+       return false;
+    }
   }
 }
