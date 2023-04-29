@@ -14,8 +14,6 @@ body {
   padding: 10px;
   cursor: pointer;
 }
-input[type='checkbox'] {
-}
 
 input[type='text'] {
   padding: 10px;
@@ -42,20 +40,9 @@ button[type='submit']:hover {
   width: 15px;
 }
 
-.article-link {
-  text-decoration: none;
-  color: white;
-  padding: 10px 20px;
-  background-color: #5510f4;
-  border-radius: 10px;
-  font-size: 20px;
-  text-transform: uppercase;
-}
-
 .load-more {
   display: block;
   margin: 0 auto;
-  margin-top: 50px;
   text-decoration: none;
   color: white;
   padding: 10px 20px;
@@ -93,8 +80,9 @@ button[type='submit']:hover {
 }
 
 .photo-card img {
+  max-width: 100%;
   width: 100%;
-  height: 300px;
+  height: 63%;
 }
 
 .info {
@@ -106,6 +94,25 @@ button[type='submit']:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 1em;
+}
+
+@media screen and (max-width: 1200px) {
+  .info-item {
+    font-size: 0.8em;
+  }
+}
+
+@media screen and (max-width: 948px) {
+  .info-item {
+    font-size: 0.6em;
+  }
+}
+
+@media screen and (max-width: 720px) {
+  .info-item {
+    font-size: 0.4em;
+  }
 }
 
 .info-item b {
