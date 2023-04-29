@@ -13,33 +13,64 @@ const loadMoreBtn = new LoadMoreBtn({
 const refs = {
   form: document.getElementById('search-form'),
   gallery: document.querySelector('.gallery'),
+  autoScrollEl: document.getElementById('forAutoScroll'),
 };
 
 refs.form.addEventListener('submit', onSubmit);
 loadMoreBtn.button.addEventListener('click', createGallery);
 
-const gallery = new SimpleLightbox('.gallery a');
+const gallery = new SimpleLightbox('.gallery a', {
+  captionType: 'attr',
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: '250',
+});
 
+//бесконечный скролл
+const observer = new IntersectionObserver(
+  (entries, observer) => {
+    entries.forEach(entry => {
+      if (pictureApiService.totalPages === 1 && pictureApiService.pages === 0) {
+        return;
+      }
+      if (pictureApiService.pages === pictureApiService.totalPages) {
+         observer.unobserve(entry.target);
+      }
+      if (entry.isIntersecting && pictureApiService.query !== '') {
+        createGallery();
+      }
+    });
+  },
+  {
+    rootMargin: '300px 0px 0px 0px',
+  }
+);
 //onSubmit - нажатие на кнопку submit
 function onSubmit(evt) {
   evt.preventDefault(); //отмена перезагрузки страницы
+
+  const formData = evt.currentTarget;
+  pictureApiService.query = formData.elements.searchQuery.value.trim(); //сохранение значения поиска в классе
+  if (pictureApiService.query === '') {
+    return;
+  }
   loadMoreBtn.checkBox = evt.target.elements.autoscroll.checked;
   if (!loadMoreBtn.checkBox) {
     loadMoreBtn.show();
   }
 
-  const formData = evt.currentTarget;
-  pictureApiService.query = formData.elements.searchQuery.value; //сохранение значения поиска в классе
-
   pictureApiService.resetPage(); //обновление счетчика станиц
   clearGallery(); //очистка галереи
-  if (evt.target.elements.autoscroll.checked) {
-    window.addEventListener('scroll', handleScroll);
-  }
+
   createGallery() //создание галереи
-    .then(() =>
-      Notify.info(`Hooray! We found ${pictureApiService.totalHits} images.`)
-    )
+    .then(() => {
+      Notify.info(
+        `Hooray! We found ${pictureApiService.totalHits} images - ${pictureApiService.totalPages} pages.`
+      );
+      if (evt.target.elements.autoscroll.checked) {
+        observer.observe(refs.autoScrollEl);
+      }
+    })
     .finally(() => {
       refs.form.reset(); //обнуление поля ввода
       refs.form.elements.autoscroll.checked = loadMoreBtn.checkBox;
@@ -137,14 +168,14 @@ function autoScroll() {
     .firstElementChild.getBoundingClientRect();
 
   window.scrollBy({
-    top: cardHeight * 10,
+    top: cardHeight * 2,
     behavior: 'smooth',
   });
 }
 
 //проверяет есть ли еще фото
 function checkEndGallery() {
-  if (Math.round(pictureApiService.totalHits / 40) < pictureApiService.pages) {
+  if (!pictureApiService.isLoadShowMore()) {
     Notify.failure(
       "We're sorry, but you've reached the end of search results."
     );
@@ -158,14 +189,4 @@ function onError(error) {
   loadMoreBtn.hide();
   clearGallery();
   updateGalleryMarkup('<p>Not found!</p>');
-}
-
-//бесконечный скролл
-function handleScroll() {
-  if (loadMoreBtn.checkBox) {
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (scrollTop + clientHeight >= scrollHeight - 5) {
-      createGallery();
-    }
-  }
 }
